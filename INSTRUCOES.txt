@@ -1,0 +1,81 @@
+Cuida_plus - Instruções de Configuração e Uso
+=============================================
+
+1. Ativar o ambiente virtual
+----------------------------
+Sempre que for trabalhar no projeto, abra o terminal (PowerShell ou CMD) dentro da pasta do projeto CuidaPlus e rode:
+
+# PowerShell
+.\venv\Scripts\Activate.ps1
+
+# CMD
+# .\venv\Scripts\activate.bat
+
+> Isso ativa o ambiente virtual do Python, garantindo que todas as bibliotecas usadas pelo projeto funcionem corretamente.
+
+---
+
+2. Instalar dependências
+------------------------
+Após ativar o ambiente virtual, instale todas as bibliotecas necessárias rodando no terminal:
+
+pip install -r requirements.txt
+
+> Esse comando lê o arquivo `requirements.txt` e instala todas as bibliotecas do projeto, incluindo:
+> - mysql-connector-python (conexão com banco MySQL)
+> - pandas (manipulação de dados e relatórios)
+> - Tkinter (interface gráfica, já vem com Python no Windows, mas mencionado para referência)
+>
+> Sempre rode este comando no terminal **com o ambiente virtual ativado**.
+
+
+---
+
+3. Estrutura de Pastas e Arquivos
+---------------------------------
+/app
+    main.py           -> Arquivo principal que inicializa a aplicação Tkinter
+    database.py       -> Conexão e funções do MySQL
+    models.py         -> Classes do sistema (Paciente, Atendimento, Sugestao, etc.)
+    /ui
+        login.py      -> Tela de login
+        paciente.py   -> Tela de paciente
+        coordenacao.py-> Tela de coordenacao hospitalar
+/assets              -> Imagens e ícones
+README.md            -> Descrição do projeto
+requirements.txt     -> Lista de dependências do projeto
+
+> Nunca altere a estrutura das pastas, e coloque arquivos novos nas pastas corretas.
+
+---
+
+4. Comandos Git básicos
+-----------------------
+Após finalizar alguma alteração ou implementação de código, siga estes passos:
+
+1. **Verificar status dos arquivos**  
+   git status  
+   > Mostra quais arquivos foram modificados ou adicionados.
+
+2. **Adicionar arquivos modificados para commit**  
+   git add .  
+   > Seleciona todos os arquivos que você mexeu para serem enviados ao commit.  
+
+3. **Criar um commit com mensagem explicativa**  
+   git commit -m "Mensagem descrevendo a alteração"  
+   > Sempre use uma mensagem clara, ex: "Adiciona tela de cadastro de pacientes".
+
+4. **Enviar as alterações para o GitHub**  
+   git push origin main  
+   > Isso envia suas alterações para o repositório remoto.  
+
+> Sempre rode `git add .`, `git commit -m "mensagem"` e `git push origin main` ao terminar alguma tarefa ou trecho de código.
+
+---
+
+5. Dicas importantes
+--------------------
+- Sempre ative o ambiente virtual antes de rodar qualquer código Python.  
+- Não modifique arquivos de colegas sem combinar antes.  
+- Use mensagens de commit claras e descritivas.  
+- Mantenha a estrutura de pastas organizada.
