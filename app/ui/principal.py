@@ -1,3 +1,4 @@
+# app/ui/principal.py
 import tkinter as tk
 from app.ui.sobre import TelaSobre
 from app.ui.pacientes import TelaPacientes
@@ -6,7 +7,8 @@ class TelaPrincipal:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Sistema de Gestão da Clínica")
-        self.root.geometry("800x600")
+        self.root.geometry("950x650")       # tamanho fixo
+        self.root.resizable(False, False)   # bloqueia redimensionamento
         self.root.configure(bg='#f0f0f0')
         self.fonte = ('Arial', 11)
         self.cor_fundo = '#f0f0f0'

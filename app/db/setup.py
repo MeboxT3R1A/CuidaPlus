@@ -1,3 +1,4 @@
+# app/db/setup.py
 from app.db.connection import conectar
 
 def criar_banco():
@@ -64,30 +65,57 @@ def criar_banco():
     
     # Inserções básicas
     cursor.executescript("""
-    INSERT OR IGNORE INTO Usuario (id, nome, email, senhaHash, papel) VALUES 
-    (1, 'Administrador', 'admin@cuidamais.com', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'ADMIN'),
-    (2, 'João Paciente', 'joao@paciente.com', 
-    'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'PACIENTE'),
-    (3, 'Maria Coordenação', 'maria@coord.com', '8c63a2fc2b14d8ae6f9d0bf2e2c4227ac2dc4bd84768e1259226b0c3d84f1c65', 'COORDENACAO');
+        -- Usuários base
+        INSERT OR IGNORE INTO Usuario (id, nome, email, senhaHash, papel) VALUES 
+        (1, 'Administrador', 'admin@cuidamais.com', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'ADMIN'),
+        (2, 'João Paciente', 'joao@paciente.com', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'PACIENTE'),
+        (3, 'Maria Coordenação', 'maria@coord.com', '8c63a2fc2b14d8ae6f9d0bf2e2c4227ac2dc4bd84768e1259226b0c3d84f1c65', 'COORDENACAO');
 
-    INSERT OR IGNORE INTO Paciente (id, dataNascimento, tipoDeficiencia)
-    VALUES (2, '2000-05-10', 'Motora');
+        -- Gera 50 pacientes (IDs 10–59)
+        """ + "\n".join([
+            f"INSERT OR IGNORE INTO Usuario (id, nome, email, senhaHash, papel) VALUES "
+            f"({i}, 'Paciente {i}', 'paciente{i}@email.com', "
+            f"'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'PACIENTE');"
+            for i in range(10, 60)
+        ]) + "\n" + "\n".join([
+            f"INSERT OR IGNORE INTO Paciente (id, dataNascimento, tipoDeficiencia) VALUES "
+            f"({i}, '200{(i%10)}-0{(i%9)+1}-15', "
+            f"'Deficiência Tipo {i%5}');"
+            for i in range(10, 60)
+        ]) + """
 
-    INSERT OR IGNORE INTO Coordenacao (id, departamento)
-    VALUES (3, 'Fisioterapia');
+        -- Gera 10 coordenadores (IDs 100–109)
+        """ + "\n".join([
+            f"INSERT OR IGNORE INTO Usuario (id, nome, email, senhaHash, papel) VALUES "
+            f"({i}, 'Coordenador {i}', 'coord{i}@email.com', "
+            f"'8c63a2fc2b14d8ae6f9d0bf2e2c4227ac2dc4bd84768e1259226b0c3d84f1c65', 'COORDENACAO');"
+            for i in range(100, 110)
+        ]) + "\n" + "\n".join([
+            f"INSERT OR IGNORE INTO Coordenacao (id, departamento) VALUES ({i}, 'Departamento {i%3}');"
+            for i in range(100, 110)
+        ]) + """
 
-    INSERT OR IGNORE INTO Atendimento (id, data, observacoes, paciente_id, coordenacao_id)
-    VALUES (1, '2025-10-15', 'Avaliação inicial de rotina', 2, 3);
+        -- Gera 60 atendimentos, 1 diagnóstico e 1 sugestão por atendimento
+        """ + "\n".join([
+            f"INSERT OR IGNORE INTO Atendimento (id, data, observacoes, paciente_id, coordenacao_id) VALUES "
+            f"({i}, '2025-10-{(i%28)+1:02d}', 'Atendimento de rotina {i}', {10 + (i%50)}, {100 + (i%10)});"
+            for i in range(1, 61)
+        ]) + "\n" + "\n".join([
+            f"INSERT OR IGNORE INTO Diagnostico (codigoCID, descricao, atendimento_id) VALUES "
+            f"('CID{i:03d}', 'Diagnóstico genérico {i}', {i});"
+            for i in range(1, 61)
+        ]) + "\n" + "\n".join([
+            f"INSERT OR IGNORE INTO Sugestao (id, texto, prioridade, atendimento_id) VALUES "
+            f"({i}, 'Sugestão de melhoria {i}', "
+            f"CASE WHEN {i}%3=0 THEN 'ALTA' WHEN {i}%3=1 THEN 'MÉDIA' ELSE 'BAIXA' END, {i});"
+            for i in range(1, 61)
+        ]) + "\n" + "\n".join([
+            f"INSERT OR IGNORE INTO Relatorio (id, tipo, dataGeracao, conteudo, coordenacao_id) VALUES "
+            f"({i}, 'PACIENTE', '2025-10-{(i%28)+1:02d}', 'Relatório automático {i}', {100 + (i%10)});"
+            for i in range(1, 61)
+        ]) + ";"
+        )
 
-    INSERT OR IGNORE INTO Diagnostico (codigoCID, descricao, atendimento_id)
-    VALUES ('G80.0', 'Paralisia cerebral espástica', 1);
-
-    INSERT OR IGNORE INTO Sugestao (id, texto, prioridade, atendimento_id)
-    VALUES (1, 'Iniciar fisioterapia motora leve', 'ALTA', 1);
-
-    INSERT OR IGNORE INTO Relatorio (id, tipo, dataGeracao, conteudo, coordenacao_id)
-    VALUES (1, 'PACIENTE', '2025-10-15', 'Relatório inicial do paciente João.', 3);
-    """)
 
     conn.commit()
     conn.close()

@@ -1,10 +1,11 @@
+# app/main.py
 from app.ui.login import LoginTela
+from app.db.setup import criar_banco
 
 def main():
-    """
-    Função principal que inicializa e executa o aplicativo
-    """
     print("Iniciando aplicativo da Clínica Especializada...")
+    from app.db.setup import criar_banco
+    criar_banco()
     app = LoginTela()
     app.executar()
 

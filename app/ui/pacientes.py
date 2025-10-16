@@ -1,5 +1,7 @@
+# app/ui/pacientes.py
 import tkinter as tk
 from tkinter import ttk
+from app.db import paciente_bd
 
 class TelaPacientes:
     def __init__(self):
@@ -23,14 +25,36 @@ class TelaPacientes:
             fg='#2c3e50'
         ).pack(pady=20)
 
+        # ---------- BOTOES DE GERENCIAMENTO (Cadastrar / Editar / Excluir) ----------
+        actions_frame = tk.Frame(self.root, bg=self.cor_fundo)
+        actions_frame.pack(pady=5)
+
+        tk.Button(actions_frame, text="Cadastrar Paciente", width=18, height=1,
+                  bg="#27ae60", fg="white", font=self.fonte,
+                  command=self.abrir_cadastrar).grid(row=0, column=0, padx=8)
+
+        tk.Button(actions_frame, text="Editar Paciente", width=18, height=1,
+                  bg="#f39c12", fg="white", font=self.fonte,
+                  command=self.abrir_editar).grid(row=0, column=1, padx=8)
+
+        tk.Button(actions_frame, text="Excluir Paciente", width=18, height=1,
+                  bg="#e74c3c", fg="white", font=self.fonte,
+                  command=self.abrir_excluir).grid(row=0, column=2, padx=8)
+
         # ---------- SEÇÃO DE ESTATÍSTICAS ----------
+        total = paciente_bd.total_pacientes()
+        novos = paciente_bd.novos_pacientes()
+        consultas = paciente_bd.consultas_hoje()
+
+        print(f"[INFO] Estatísticas carregadas: {total} pacientes, {novos} novos, {consultas} consultas hoje.")
+
         frame_stats = tk.Frame(self.root, bg=self.cor_fundo)
         frame_stats.pack(pady=10)
 
         estatisticas = [
-            ("#e67e22", "Total de Pacientes Ativos", "156"),  # Laranja
-            ("#27ae60", "Novos Pacientes (Mês)", "12"),       # Verde
-            ("#2980b9", "Consultas Hoje", "8"),               # Azul
+            ("#e67e22", "Total de Pacientes Ativos", str(total)),  # Laranja
+            ("#27ae60", "Novos Pacientes (Mês)", str(novos)),      # Verde
+            ("#2980b9", "Consultas Hoje", str(consultas)),         # Azul
         ]
 
         for i, (cor, titulo, valor) in enumerate(estatisticas):
@@ -76,11 +100,9 @@ class TelaPacientes:
             canvas.yview_scroll(-1 * int(event.delta / 120), "units")
 
         canvas.bind_all("<MouseWheel>", _on_mousewheel)  # Windows
-        canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))  # Linux scroll up
-        canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))   # Linux scroll down
 
         # ---------- CARREGAR PACIENTES ----------
-        self.carregar_pacientes_exemplo()
+        self.carregar_pacientes()
 
         # ---------- BOTÃO DE VOLTAR ----------
         tk.Button(
@@ -94,21 +116,14 @@ class TelaPacientes:
             height=2
         ).pack(pady=20)
 
-    # ---------- MOCK DE PACIENTES ----------
-    def carregar_pacientes_exemplo(self):
-        pacientes = [
-            {"nome": "João Silva", "idade": 24},
-            {"nome": "Maria Souza", "idade": 31},
-            {"nome": "Carlos Oliveira", "idade": 29},
-            {"nome": "Ana Lima", "idade": 22},
-            {"nome": "Lucas Pereira", "idade": 35},
-            {"nome": "Joào Silva", "idade": 23},
-            {"nome": "Daniel Santos", "idade": 67},
-            {"nome": "Eduardo Oliveira", "idade": 43},
-            {"nome": "Silvana Lima", "idade": 49},
-        ]
+    # ---------- CARREGAR PACIENTES ----------
+    def carregar_pacientes(self):
+        # limpa área
+        for w in self.frame_pacientes.winfo_children():
+            w.destroy()
 
-        for i, p in enumerate(pacientes):
+        pacientes = paciente_bd.listar_pacientes()
+        for i, (nome, data_nasc) in enumerate(pacientes):
             card = tk.Frame(
                 self.frame_pacientes,
                 bg="white",
@@ -120,13 +135,33 @@ class TelaPacientes:
             card.grid(row=i // 3, column=i % 3, padx=15, pady=15)
             card.pack_propagate(False)
 
-            tk.Label(card, text=p["nome"],
-                     font=('Arial', 12, 'bold'), bg="white", fg="#2c3e50").pack(pady=(10, 0))
-            tk.Label(card, text=f"Idade: {p['idade']}",
-                     font=('Arial', 10), bg="white").pack(pady=(0, 10))
+            tk.Label(card, text=nome,
+                    font=('Arial', 12, 'bold'), bg="white", fg="#2c3e50").pack(pady=(10, 0))
+            tk.Label(card, text=f"Nascimento: {data_nasc}",
+                    font=('Arial', 10), bg="white").pack(pady=(0, 10))
 
             tk.Button(card, text="Ver Mais",
-                      bg="#3498db", fg="white", font=('Arial', 10, 'bold')).pack(ipadx=10, ipady=3)
+                    bg="#3498db", fg="white", font=('Arial', 10, 'bold')).pack(ipadx=10, ipady=3)
+
+    # ---------- ABERTURA DAS TELAS DE GERENCIAMENTO ----------
+    def abrir_cadastrar(self):
+        # ---------------- Ponto abrir_cadastrar ----------------
+        # importa só no momento para evitar import circular
+        from app.ui.tela_cadastro_paciente import TelaCadastroPaciente
+        self.root.destroy()
+        TelaCadastroPaciente(self.root, self).executar() if hasattr(TelaCadastroPaciente, "executar") else TelaCadastroPaciente(tk.Tk(), self).mainloop()
+
+    def abrir_editar(self):
+        # ---------------- Ponto abrir_editar ----------------
+        from app.ui.tela_editar_paciente import TelaEditarPaciente
+        self.root.destroy()
+        TelaEditarPaciente(self.root, self).executar() if hasattr(TelaEditarPaciente, "executar") else TelaEditarPaciente(tk.Tk(), self).mainloop()
+
+    def abrir_excluir(self):
+        # ---------------- Ponto abrir_excluir ----------------
+        from app.ui.tela_excluir_paciente import TelaExcluirPaciente
+        self.root.destroy()
+        TelaExcluirPaciente(self.root, self).executar() if hasattr(TelaExcluirPaciente, "executar") else TelaExcluirPaciente(tk.Tk(), self).mainloop()
 
     # ---------- VOLTAR ----------
     def voltar(self):

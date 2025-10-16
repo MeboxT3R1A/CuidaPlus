@@ -1,3 +1,4 @@
+# app/db/login_bd.py
 from .connection import conectar
 import hashlib
 
@@ -14,7 +15,9 @@ def autenticar_usuario(email, senha):
     user = cursor.fetchone()
     conn.close()
     if user:
+        print(f"[LOGIN] Usuário autenticado: {user[1]} ({user[2]})")
         return {"id": user[0], "nome": user[1], "papel": user[2]}
+    print("[LOGIN] Falha de autenticação para:", email)
     return None
 
 def cadastrar_usuario(nome, email, senha, papel):

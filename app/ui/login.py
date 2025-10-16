@@ -1,13 +1,15 @@
+# app/ui/login.py
 import tkinter as tk
 from tkinter import messagebox
 from app.ui.principal import TelaPrincipal
-from app.db import user_dao
+from app.db import login_bd
 
 class LoginTela:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Cuida + Mais")
-        self.root.geometry("800x600")
+        self.root.geometry("700x500")       # tamanho fixo
+        self.root.resizable(False, False)   # bloqueia redimensionamento
         self.root.configure(bg='#f0f0f0')
 
         self.fonte_grande = ('Arial', 12, 'bold')
@@ -44,7 +46,7 @@ class LoginTela:
         login_frame = tk.Frame(self.frame, bg=self.cor_fundo)
         login_frame.pack(pady=50)
 
-        tk.Label(login_frame, text="Usuário:", font=self.fonte_grande, bg=self.cor_fundo).grid(row=0, column=0, padx=10, pady=10)
+        tk.Label(login_frame, text="E-mail:", font=self.fonte_grande, bg=self.cor_fundo).grid(row=0, column=0, padx=10, pady=10)
         self.entry_usuario = tk.Entry(login_frame, font=self.fonte_normal, width=20)
         self.entry_usuario.grid(row=0, column=1, padx=10, pady=10)
 
@@ -70,7 +72,7 @@ class LoginTela:
             messagebox.showwarning("Aviso", "Preencha todos os campos.")
             return
 
-        usuario = user_dao.autenticar_usuario(email, senha)
+        usuario = login_bd.autenticar_usuario(email, senha)
 
         if usuario:
             messagebox.showinfo("Bem-vindo", f"Olá, {usuario['nome']}!")
