@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
-from ui.principal import TelaPrincipal
+from app.ui.principal import TelaPrincipal
+from app.db import user_dao
 
 class LoginTela:
     def __init__(self):
@@ -62,10 +63,17 @@ class LoginTela:
 
 
     def validar_login(self):
-        usuario = self.entry_usuario.get().strip()
+        email = self.entry_usuario.get().strip()
         senha = self.entry_senha.get().strip()
 
-        if usuario == "admin" and senha == "123":
+        if not email or not senha:
+            messagebox.showwarning("Aviso", "Preencha todos os campos.")
+            return
+
+        usuario = user_dao.autenticar_usuario(email, senha)
+
+        if usuario:
+            messagebox.showinfo("Bem-vindo", f"Olá, {usuario['nome']}!")
             self.root.destroy()
             TelaPrincipal().executar()
         else:

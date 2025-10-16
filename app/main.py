@@ -1,4 +1,4 @@
-from ui.login import LoginTela
+from app.ui.login import LoginTela
 
 def main():
     """

@@ -1,6 +1,6 @@
 import tkinter as tk
-from ui.sobre import TelaSobre
-from ui.pacientes import TelaPacientes
+from app.ui.sobre import TelaSobre
+from app.ui.pacientes import TelaPacientes
 
 class TelaPrincipal:
     def __init__(self):
@@ -37,7 +37,7 @@ class TelaPrincipal:
 
     def logout(self):
         self.root.destroy()
-        from ui.login import LoginTela
+        from app.ui.login import LoginTela
         LoginTela().executar()
 
     def executar(self):
