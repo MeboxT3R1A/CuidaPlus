@@ -4,7 +4,7 @@ from tkinter import messagebox
 from app.ui.principal import TelaPrincipal
 from app.db import login_bd
 
-class LoginTela:
+class TelaLogin:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Cuida + Mais")
@@ -61,8 +61,7 @@ class LoginTela:
             fg="white",
             font=self.fonte_normal,
             command=self.validar_login
-        ).grid(row=2, column=0, columnspan=2, pady=20, ipadx=40)  # 👈 aumenta a largura
-
+        ).grid(row=2, column=0, columnspan=2, pady=20, ipadx=40)
 
     def validar_login(self):
         email = self.entry_usuario.get().strip()

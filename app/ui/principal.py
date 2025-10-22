@@ -1,7 +1,7 @@
 # app/ui/principal.py
 import tkinter as tk
-from app.ui.sobre import TelaSobre
-from app.ui.pacientes import TelaPacientes
+from app.ui.tela_sobre import TelaSobre
+from app.ui.tela_pacientes import TelaPacientes
 
 class TelaPrincipal:
     def __init__(self):
@@ -39,8 +39,8 @@ class TelaPrincipal:
 
     def logout(self):
         self.root.destroy()
-        from app.ui.login import LoginTela
-        LoginTela().executar()
+        from app.ui.tela_login import TelaLogin
+        TelaLogin().executar()
 
     def executar(self):
         self.root.mainloop()

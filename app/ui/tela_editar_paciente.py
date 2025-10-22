@@ -5,21 +5,38 @@ from app.ui.tela_popup_editar import EditarPopup
 from app.db import paciente_bd
 
 class TelaEditarPaciente(tk.Frame):
-    def __init__(self, master, controlador):
-        super().__init__(master, bg="#f9f9f9")
-        self.controlador = controlador
+    def __init__(self, master):
+        self.master = master
+        self.master.withdraw()
+        
+        self.janela = tk.Toplevel(master)
+        self.janela.title("Cadastro de Paciente")
+        self.janela.geometry("500x400")
+        self.janela.configure(bg="#f9f9f9")
 
-        tk.Label(self, text="Editar Paciente", font=("Arial", 16, "bold"), bg="#f9f9f9").pack(pady=10)
+        # título
+        tk.Label(self.janela, text="Editar Paciente",
+                 font=("Arial", 16, "bold"), bg="#f9f9f9").pack(pady=10)
 
-        self.tree = ttk.Treeview(self, columns=("id", "nome", "idade", "tipo", "contato", "responsavel"), show="headings")
+        # tabela
+        self.tree = ttk.Treeview(
+            self.janela,
+            columns=("id", "nome", "idade", "tipo", "contato", "responsavel"),
+            show="headings"
+        )
         for col in self.tree["columns"]:
             self.tree.heading(col, text=col.title())
         self.tree.pack(pady=10, fill="x")
 
-        tk.Button(self, text="Atualizar Lista", command=self.carregar_pacientes).pack()
-        tk.Button(self, text="Editar Selecionado", command=self.editar_paciente).pack(pady=5)
-        tk.Button(self, text="Voltar", command=lambda: controlador.mostrar_tela("menu_gerenciar")).pack(pady=5)
+        # botões
+        tk.Button(self.janela, text="Atualizar Lista",
+                  command=self.carregar_pacientes).pack()
+        tk.Button(self.janela, text="Editar Selecionado",
+                  command=self.editar_paciente).pack(pady=5)
+        tk.Button(self.janela, text="Voltar",
+                  command=self.voltar, width=15).pack(pady=10)
 
+        # carrega dados
         self.carregar_pacientes()
 
     def carregar_pacientes(self):
@@ -27,7 +44,6 @@ class TelaEditarPaciente(tk.Frame):
             self.tree.delete(i)
 
         pacientes = paciente_bd.listar()
-
         for row in pacientes:
             self.tree.insert("", tk.END, values=row)
 
@@ -40,4 +56,8 @@ class TelaEditarPaciente(tk.Frame):
             return
 
         dados = self.tree.item(item)["values"]
-        EditarPopup(self, dados, self.carregar_pacientes)
+        EditarPopup(self.janela, dados, self.carregar_pacientes)
+
+    def voltar(self):
+        self.janela.destroy()
+        self.master.deiconify()

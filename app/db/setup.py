@@ -67,7 +67,7 @@ def criar_banco():
     cursor.executescript("""
         -- Usuários base
         INSERT OR IGNORE INTO Usuario (id, nome, email, senhaHash, papel) VALUES 
-        (1, 'Administrador', 'admin@cuidamais.com', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'ADMIN'),
+        (1, 'Administrador', 'a', 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb', 'ADMIN'),
         (2, 'João Paciente', 'joao@paciente.com', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'PACIENTE'),
         (3, 'Maria Coordenação', 'maria@coord.com', '8c63a2fc2b14d8ae6f9d0bf2e2c4227ac2dc4bd84768e1259226b0c3d84f1c65', 'COORDENACAO');
 
@@ -76,12 +76,12 @@ def criar_banco():
             f"INSERT OR IGNORE INTO Usuario (id, nome, email, senhaHash, papel) VALUES "
             f"({i}, 'Paciente {i}', 'paciente{i}@email.com', "
             f"'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'PACIENTE');"
-            for i in range(10, 60)
+            for i in range(1, 51)
         ]) + "\n" + "\n".join([
             f"INSERT OR IGNORE INTO Paciente (id, dataNascimento, tipoDeficiencia) VALUES "
             f"({i}, '200{(i%10)}-0{(i%9)+1}-15', "
             f"'Deficiência Tipo {i%5}');"
-            for i in range(10, 60)
+            for i in range(1, 51)
         ]) + """
 
         -- Gera 10 coordenadores (IDs 100–109)

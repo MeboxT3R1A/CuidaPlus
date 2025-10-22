@@ -1,4 +1,4 @@
-# app/ui/pacientes.py
+# app/ui/tela_pacientes.py
 import tkinter as tk
 from tkinter import ttk
 from app.db import paciente_bd
@@ -143,25 +143,24 @@ class TelaPacientes:
             tk.Button(card, text="Ver Mais",
                     bg="#3498db", fg="white", font=('Arial', 10, 'bold')).pack(ipadx=10, ipady=3)
 
-    # ---------- ABERTURA DAS TELAS DE GERENCIAMENTO ----------
+    
     def abrir_cadastrar(self):
-        # ---------------- Ponto abrir_cadastrar ----------------
-        # importa só no momento para evitar import circular
         from app.ui.tela_cadastro_paciente import TelaCadastroPaciente
-        self.root.destroy()
-        TelaCadastroPaciente(self.root, self).executar() if hasattr(TelaCadastroPaciente, "executar") else TelaCadastroPaciente(tk.Tk(), self).mainloop()
+        self.root.withdraw()  # apenas esconde
+        TelaCadastroPaciente(self.root)  # passa a mesma janela principal
+
 
     def abrir_editar(self):
-        # ---------------- Ponto abrir_editar ----------------
         from app.ui.tela_editar_paciente import TelaEditarPaciente
-        self.root.destroy()
-        TelaEditarPaciente(self.root, self).executar() if hasattr(TelaEditarPaciente, "executar") else TelaEditarPaciente(tk.Tk(), self).mainloop()
+        self.root.withdraw()
+        TelaEditarPaciente(self.root)  # mesma janela, sem destruir
+
 
     def abrir_excluir(self):
-        # ---------------- Ponto abrir_excluir ----------------
         from app.ui.tela_excluir_paciente import TelaExcluirPaciente
-        self.root.destroy()
-        TelaExcluirPaciente(self.root, self).executar() if hasattr(TelaExcluirPaciente, "executar") else TelaExcluirPaciente(tk.Tk(), self).mainloop()
+        self.root.withdraw()
+        TelaExcluirPaciente(self.root)
+
 
     # ---------- VOLTAR ----------
     def voltar(self):
