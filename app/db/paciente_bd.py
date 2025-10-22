@@ -66,23 +66,25 @@ def salvar(dados):
     """
     Cria um novo paciente. Espera um dicionário no formato:
     {
-        'nome': ..., 'idade': ..., 'tipo_de_deficiência': ...,
-        'contato': ..., 'responsável': ...
+        'nome': ..., 'data_nasc': 'YYYY-MM-DD', 'tipo_deficiencia': ...,
+        'contato_tipo': ..., 'contato': ...
     }
     """
     conn = conectar()
     cursor = conn.cursor()
     try:
+        # Primeiro insere no Usuario
         cursor.execute("""
             INSERT INTO Usuario (nome, email, senhaHash, papel)
             VALUES (?, ?, ?, 'PACIENTE')
         """, (dados['nome'], f"{dados['nome'].lower()}@exemplo.com", "hash_fake"))
         novo_id = cursor.lastrowid
 
+        # Agora insere no Paciente usando a data de nascimento real
         cursor.execute("""
             INSERT INTO Paciente (id, dataNascimento, tipoDeficiencia)
-            VALUES (?, date('now', ?), ?)
-        """, (novo_id, f"-{int(dados.get('idade', 25))} years", dados["tipo_de_deficiência"]))
+            VALUES (?, ?, ?)
+        """, (novo_id, dados["data_nasc"], dados["tipo_deficiencia"]))
 
         conn.commit()
         print(f"[LOG][paciente_bd.salvar] Paciente '{dados['nome']}' salvo com ID={novo_id}.")
@@ -93,6 +95,7 @@ def salvar(dados):
         return False
     finally:
         conn.close()
+
 
 
 def atualizar(id_, dados):
