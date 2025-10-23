@@ -35,7 +35,9 @@ class TelaEditarPaciente(tk.Frame):
                   command=self.editar_paciente).pack(pady=5)
         tk.Button(self.janela, text="Voltar",
                   command=self.voltar, width=15).pack(pady=10)
-
+        
+                # Quando a janela for fechada manualmente, voltar também
+        self.janela.protocol("WM_DELETE_WINDOW", self.voltar)
         # carrega dados
         self.carregar_pacientes()
 

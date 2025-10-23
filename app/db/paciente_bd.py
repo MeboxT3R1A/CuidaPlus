@@ -1,6 +1,6 @@
 # app/db/paciente_bd.py
 from app.db.connection import conectar
-from datetime import date, timedelta
+from datetime import date
 
 def total_pacientes():
     conn = conectar()
@@ -35,9 +35,7 @@ def listar_pacientes():
     conn.close()
     return pacientes
 
-
 #-------------------------------------
-
 
 def listar():
     """Retorna todos os pacientes com informações básicas."""
@@ -61,26 +59,25 @@ def listar():
     finally:
         conn.close()
 
-
 def salvar(dados):
     """
     Cria um novo paciente. Espera um dicionário no formato:
     {
         'nome': ..., 'data_nasc': 'YYYY-MM-DD', 'tipo_deficiencia': ...,
-        'contato_tipo': ..., 'contato': ...
+        'contato_tipo': 'Email', 'contato': 'email@dominio.com'
     }
     """
     conn = conectar()
     cursor = conn.cursor()
     try:
-        # Primeiro insere no Usuario
+        # Insere no Usuario usando o email real
         cursor.execute("""
             INSERT INTO Usuario (nome, email, senhaHash, papel)
             VALUES (?, ?, ?, 'PACIENTE')
-        """, (dados['nome'], f"{dados['nome'].lower()}@exemplo.com", "hash_fake"))
+        """, (dados['nome'], dados['contato'], "hash_fake"))
         novo_id = cursor.lastrowid
 
-        # Agora insere no Paciente usando a data de nascimento real
+        # Insere no Paciente
         cursor.execute("""
             INSERT INTO Paciente (id, dataNascimento, tipoDeficiencia)
             VALUES (?, ?, ?)
@@ -96,19 +93,13 @@ def salvar(dados):
     finally:
         conn.close()
 
-
-
 def atualizar(id_, dados):
     """Atualiza dados de um paciente existente."""
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute("""
-            UPDATE Usuario SET nome=? WHERE id=?
-        """, (dados["nome"], id_))
-        cursor.execute("""
-            UPDATE Paciente SET tipoDeficiencia=? WHERE id=?
-        """, (dados["tipo_de_deficiência"], id_))
+        cursor.execute("UPDATE Usuario SET nome=? WHERE id=?", (dados["nome"], id_))
+        cursor.execute("UPDATE Paciente SET tipoDeficiencia=? WHERE id=?", (dados["tipo_de_deficiencia"], id_))
         conn.commit()
         print(f"[LOG][paciente_bd.atualizar] Paciente ID={id_} atualizado.")
         return True
@@ -118,7 +109,6 @@ def atualizar(id_, dados):
         return False
     finally:
         conn.close()
-
 
 def excluir(id_):
     """Remove um paciente (e seu usuário correspondente)."""

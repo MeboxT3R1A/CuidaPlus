@@ -20,12 +20,3 @@ def autenticar_usuario(email, senha):
     print("[LOGIN] Falha de autenticação para:", email)
     return None
 
-def cadastrar_usuario(nome, email, senha, papel):
-    conn = conectar()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO Usuario (nome, email, senhaHash, papel) VALUES (?, ?, ?, ?)",
-        (nome, email, hash_senha(senha), papel)
-    )
-    conn.commit()
-    conn.close()
