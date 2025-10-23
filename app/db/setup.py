@@ -19,6 +19,7 @@ def criar_banco():
         id INTEGER PRIMARY KEY,
         dataNascimento TEXT,
         tipoDeficiencia TEXT,
+        responsavel TEXT,
         FOREIGN KEY (id) REFERENCES Usuario(id) ON DELETE CASCADE
     );
 

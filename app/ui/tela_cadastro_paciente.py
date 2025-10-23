@@ -27,6 +27,7 @@ class TelaCadastroPaciente:
             ("Data de Nascimento", "data_nasc"),
             ("Tipo de Deficiência", "tipo_deficiencia"),
             ("Email", "email"),
+            ("Responsável", "responsavel")
         ]
         self.entradas = {}
 
@@ -137,6 +138,7 @@ class TelaCadastroPaciente:
 
         tipo_def = self.entradas["tipo_deficiencia"].get().strip()
         email_raw = self.entradas["email"].get().strip()
+        responsavel = self.entradas["responsavel"].get().strip()
 
         # validações básicas
         if not nome:
@@ -153,12 +155,16 @@ class TelaCadastroPaciente:
         if not ok_email:
             print(f"[ERRO] {email_valido}")
             return
+        
+        if not responsavel:
+            responsavel = "Responsavel não identificado"
 
         dados = {
             "nome": nome,
             "data_nasc": data_iso,
             "tipo_deficiencia": tipo_def,
-            "contato": email_valido  # para popular Usuario.email
+            "contato": email_valido,
+            "responsavel": responsavel,  # para popular Usuario.email
         }
 
         try:

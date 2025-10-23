@@ -63,29 +63,33 @@ def salvar(dados):
     """
     Cria um novo paciente. Espera um dicionário no formato:
     {
-        'nome': ..., 'data_nasc': 'YYYY-MM-DD', 'tipo_deficiencia': ...,
-        'contato_tipo': 'Email', 'contato': 'email@dominio.com'
+        'nome': str,
+        'data_nasc': 'YYYY-MM-DD',
+        'tipo_deficiencia': str,
+        'contato': str,  # email
+        'responsavel': str
     }
     """
     conn = conectar()
     cursor = conn.cursor()
     try:
-        # Insere no Usuario usando o email real
+        # Inserção em Usuario
         cursor.execute("""
             INSERT INTO Usuario (nome, email, senhaHash, papel)
             VALUES (?, ?, ?, 'PACIENTE')
         """, (dados['nome'], dados['contato'], "hash_fake"))
         novo_id = cursor.lastrowid
 
-        # Insere no Paciente
+        # Inserção em Paciente
         cursor.execute("""
-            INSERT INTO Paciente (id, dataNascimento, tipoDeficiencia)
-            VALUES (?, ?, ?)
-        """, (novo_id, dados["data_nasc"], dados["tipo_deficiencia"]))
+            INSERT INTO Paciente (id, dataNascimento, tipoDeficiencia, responsavel)
+            VALUES (?, ?, ?, ?)
+        """, (novo_id, dados["data_nasc"], dados["tipo_deficiencia"], dados["responsavel"]))
 
         conn.commit()
         print(f"[LOG][paciente_bd.salvar] Paciente '{dados['nome']}' salvo com ID={novo_id}.")
         return True
+
     except Exception as e:
         print("[ERRO][paciente_bd.salvar]:", e)
         conn.rollback()
