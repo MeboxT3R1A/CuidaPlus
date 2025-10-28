@@ -1,6 +1,7 @@
 # app/ui/tela_pacientes.py
 import tkinter as tk
 from tkinter import ttk
+from datetime import datetime, date
 from app.db import paciente_bd
 
 class TelaPacientes:
@@ -116,6 +117,29 @@ class TelaPacientes:
             height=2
         ).pack(pady=20)
 
+    # ---------- UTIL ----------    
+    def _calcular_idade(self, data_str):
+        """
+        Aceita 'YYYY-MM-DD' (preferencial) ou 'DD/MM/YYYY'.
+        Retorna idade em anos (int) ou None se inválido.
+        """
+        if not data_str:
+            return None
+        try:
+            if "-" in data_str:
+                dt = datetime.strptime(data_str, "%Y-%m-%d").date()
+            elif "/" in data_str:
+                dt = datetime.strptime(data_str, "%d/%m/%Y").date()
+            else:
+                # formato inesperado
+                return None
+            hoje = date.today()
+            idade = hoje.year - dt.year - ((hoje.month, hoje.day) < (dt.month, dt.day))
+            return idade
+        except Exception as e:
+            print(f"[ERRO] _calcular_idade: formato inválido '{data_str}': {e}")
+            return None
+
     # ---------- CARREGAR PACIENTES ----------
     def carregar_pacientes(self):
         # limpa área
@@ -137,30 +161,36 @@ class TelaPacientes:
 
             tk.Label(card, text=nome,
                     font=('Arial', 12, 'bold'), bg="white", fg="#2c3e50").pack(pady=(10, 0))
-            tk.Label(card, text=f"Nascimento: {data_nasc}",
+
+            # calcula idade e mostra em anos
+            idade = self._calcular_idade(data_nasc)
+            if idade is None:
+                idade_text = "Idade desconhecida"
+            elif idade == 1:
+                idade_text = "1 ano"
+            else:
+                idade_text = f"{idade} anos"
+
+            tk.Label(card, text=f"Idade: {idade_text}",
                     font=('Arial', 10), bg="white").pack(pady=(0, 10))
 
             tk.Button(card, text="Ver Mais",
                     bg="#3498db", fg="white", font=('Arial', 10, 'bold')).pack(ipadx=10, ipady=3)
 
-    
     def abrir_cadastrar(self):
         from app.ui.tela_cadastro_paciente import TelaCadastroPaciente
         self.root.withdraw()  # apenas esconde
         TelaCadastroPaciente(self.root)  # passa a mesma janela principal
-
 
     def abrir_editar(self):
         from app.ui.tela_editar_paciente import TelaEditarPaciente
         self.root.withdraw()
         TelaEditarPaciente(self.root)  # mesma janela, sem destruir
 
-
     def abrir_excluir(self):
         from app.ui.tela_excluir_paciente import TelaExcluirPaciente
         self.root.withdraw()
         TelaExcluirPaciente(self.root)
-
 
     # ---------- VOLTAR ----------
     def voltar(self):

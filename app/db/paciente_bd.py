@@ -38,17 +38,22 @@ def listar_pacientes():
 #-------------------------------------
 
 def listar():
-    """Retorna todos os pacientes com informações básicas."""
+    """Retorna todos os pacientes com informações básicas:
+       (id, nome, dataNascimento, idade, tipoDeficiencia, email, responsavel)
+    """
     conn = conectar()
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            SELECT u.id, u.nome, 
+            SELECT u.id, u.nome,
+                   p.dataNascimento,
                    CAST((strftime('%Y', 'now') - strftime('%Y', p.dataNascimento)) AS INTEGER) AS idade,
-                   p.tipoDeficiencia, u.email, 'Responsável Exemplo'
+                   p.tipoDeficiencia, u.email,
+                   COALESCE(p.responsavel, 'Responsável não identificado') as responsavel
             FROM Usuario u
             JOIN Paciente p ON u.id = p.id
             WHERE u.papel = 'PACIENTE'
+            ORDER BY u.id
         """)
         pacientes = cursor.fetchall()
         print(f"[LOG][paciente_bd.listar] {len(pacientes)} pacientes retornados.")
@@ -102,8 +107,11 @@ def atualizar(id_, dados):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute("UPDATE Usuario SET nome=? WHERE id=?", (dados["nome"], id_))
-        cursor.execute("UPDATE Paciente SET tipoDeficiencia=? WHERE id=?", (dados["tipo_de_deficiencia"], id_))
+        # atualiza nome e email em Usuario
+        cursor.execute("UPDATE Usuario SET nome=?, email=? WHERE id=?", (dados.get("nome"), dados.get("contato"), id_))
+        # atualiza tipoDeficiencia e responsavel em Paciente
+        cursor.execute("UPDATE Paciente SET tipoDeficiencia=?, responsavel=? WHERE id=?", 
+                       (dados.get("tipo_de_deficiencia"), dados.get("responsavel"), id_))
         conn.commit()
         print(f"[LOG][paciente_bd.atualizar] Paciente ID={id_} atualizado.")
         return True
