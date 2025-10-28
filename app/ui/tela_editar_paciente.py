@@ -10,35 +10,64 @@ class TelaEditarPaciente(tk.Frame):
         self.master.withdraw()
         
         self.janela = tk.Toplevel(master)
-        self.janela.title("Cadastro de Paciente")
-        self.janela.geometry("500x400")
+        self.janela.title("Editar Paciente")
+        self.janela.state("zoomed")
         self.janela.configure(bg="#f9f9f9")
+        self.janela.resizable(False, False)
 
-        # título
+        # Título
         tk.Label(self.janela, text="Editar Paciente",
-                 font=("Arial", 16, "bold"), bg="#f9f9f9").pack(pady=10)
+                 font=("Arial", 16, "bold"), bg="#f9f9f9").pack(pady=(10,0))
 
-        # tabela
+        # Linha preta abaixo do título (simula separação do header)
+        tk.Frame(self.janela, height=2, bg="black").pack(fill="x", padx=40, pady=(0,10))
+
+        # ------------------- ESTILO TREEVIEW -------------------
+        style = ttk.Style()
+        style.theme_use("clam")  # obrigatório para customizações funcionarem
+
+        # Cabeçalho
+        style.configure(
+            "Treeview.Heading",
+            font=("Arial", 12, "bold"),
+            background="#f2f2f2",
+            foreground="black",
+            relief="flat"
+        )
+
+        # Corpo da tabela
+        style.configure(
+            "Treeview",
+            font=("Arial", 11),
+            rowheight=28,
+            background="#ffffff",
+            fieldbackground="#ffffff",
+            relief="flat",
+            borderwidth=0
+        )
+        style.map("Treeview", background=[("selected", "#cce5ff")])
+
+        # ------------------- TREEVIEW -------------------
         self.tree = ttk.Treeview(
             self.janela,
-            columns=("id", "nome", "idade", "tipo", "contato", "responsavel"),
+            columns=("nome", "idade", "tipo", "contato", "responsavel"),
             show="headings"
         )
         for col in self.tree["columns"]:
             self.tree.heading(col, text=col.title())
-        self.tree.pack(pady=10, fill="x")
+            self.tree.column(col, anchor="center")
 
-        # botões
+        self.tree.pack(padx=40, pady=10, fill="both", expand=True)
+
+        # ------------------- BOTÕES -------------------
         tk.Button(self.janela, text="Atualizar Lista",
                   command=self.carregar_pacientes).pack()
         tk.Button(self.janela, text="Editar Selecionado",
                   command=self.editar_paciente).pack(pady=5)
         tk.Button(self.janela, text="Voltar",
-                  command=self.voltar, width=15).pack(pady=10)
-        
-                # Quando a janela for fechada manualmente, voltar também
+                  command=self.voltar, width=15).pack(pady=(10, 60))
+
         self.janela.protocol("WM_DELETE_WINDOW", self.voltar)
-        # carrega dados
         self.carregar_pacientes()
 
     def carregar_pacientes(self):
@@ -46,8 +75,13 @@ class TelaEditarPaciente(tk.Frame):
             self.tree.delete(i)
 
         pacientes = paciente_bd.listar()
-        for row in pacientes:
-            self.tree.insert("", tk.END, values=row)
+        for i, row in enumerate(pacientes):
+            cor = "cinza" if i % 2 == 0 else "branco"
+            self.tree.insert("", tk.END, values=row[1:], tags=(cor,))
+
+        # Configura cores alternadas
+        self.tree.tag_configure("cinza", background="#f2f2f2")
+        self.tree.tag_configure("branco", background="#ffffff")
 
         print("[LOG] Lista de pacientes carregada")
 
