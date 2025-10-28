@@ -77,7 +77,7 @@ class TelaEditarPaciente(tk.Frame):
         pacientes = paciente_bd.listar()
         for i, row in enumerate(pacientes):
             cor = "cinza" if i % 2 == 0 else "branco"
-            self.tree.insert("", tk.END, values=row[1:], tags=(cor,))
+            self.tree.insert("", tk.END, iid=row[0], values=row[1:], tags=(cor,))
 
         # Configura cores alternadas
         self.tree.tag_configure("cinza", background="#f2f2f2")
@@ -92,7 +92,9 @@ class TelaEditarPaciente(tk.Frame):
             return
 
         dados = self.tree.item(item)["values"]
-        EditarPopup(self.janela, dados, self.carregar_pacientes)
+        id_paciente = self.tree.focus()
+        EditarPopup(self.janela, [id_paciente]+dados, self.carregar_pacientes)
+
 
     def voltar(self):
         self.janela.destroy()

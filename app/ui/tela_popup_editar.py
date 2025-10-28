@@ -9,7 +9,7 @@ class EditarPopup(tk.Toplevel):
         self.callback = callback
         self.title("Editar Paciente")
 
-        campos = ["Nome", "Idade", "Tipo de Deficiência", "Contato", "Responsável"]
+        campos = ["Nome", "Idade", "Tipo de Deficiencia", "Contato", "Responsavel"]
         self.entradas = {}
 
         for i, campo in enumerate(campos):
@@ -31,6 +31,6 @@ class EditarPopup(tk.Toplevel):
 
         print(f"[LOG] Atualização de paciente ID={id_}: {dados}")
 
-        messagebox.showinfo("Sucesso", "Paciente atualizado!")
         self.callback()
         self.destroy()
+

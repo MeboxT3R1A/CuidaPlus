@@ -9,31 +9,56 @@ class TelaExcluirPaciente(tk.Frame):
         self.master.withdraw()
         
         self.janela = tk.Toplevel(master)
-        self.janela.title("Cadastro de Paciente")
-        self.janela.geometry("500x400")
+        self.janela.title("Excluir Paciente")
+        self.janela.state("zoomed")
         self.janela.configure(bg="#f9f9f9")
+        self.janela.resizable(False, False)
 
+        # ------------------- TÍTULO -------------------
         tk.Label(self.janela, text="Excluir Paciente",
                  font=("Arial", 16, "bold"), bg="#f9f9f9").pack(pady=10)
 
+        # ------------------- ESTILO TREEVIEW -------------------
+        style = ttk.Style()
+        style.theme_use("clam")  # necessário para customizações
+
+        style.configure(
+            "Treeview.Heading",
+            font=("Arial", 12, "bold"),
+            background="#f2f2f2",
+            foreground="black",
+            relief="flat"
+        )
+
+        style.configure(
+            "Treeview",
+            background="#ffffff",
+            fieldbackground="#ffffff",
+            rowheight=28,
+            relief="flat"
+        )
+        style.map("Treeview", background=[("selected", "#cce5ff")])
+        style.layout("Treeview", [("Treeview.treearea", {"sticky": "nswe"})])
+
+        # ------------------- TREEVIEW -------------------
         self.tree = ttk.Treeview(
             self.janela,
-            columns=("id", "nome", "idade", "tipo", "contato", "responsavel"),
+            columns=("nome", "idade", "tipo", "contato", "responsavel"),
             show="headings"
         )
         for col in self.tree["columns"]:
             self.tree.heading(col, text=col.title())
-        self.tree.pack(pady=10, fill="x")
+            self.tree.column(col, anchor="center")
+        self.tree.pack(padx=40, pady=10, fill="both", expand=True)
 
+        # ------------------- BOTÕES -------------------
         tk.Button(self.janela, text="Atualizar Lista",
                   command=self.carregar_pacientes).pack()
         tk.Button(self.janela, text="Excluir Selecionado",
-                  command=self.excluir_paciente, bg="#E74C3C",
-                  fg="white").pack(pady=5)
+                  command=self.excluir_paciente, bg="#E74C3C", fg="white").pack(pady=5)
         tk.Button(self.janela, text="Voltar",
-                  command=self.voltar, width=15).pack(pady=10)
-        
-                # Quando a janela for fechada manualmente, voltar também
+                  command=self.voltar, width=15).pack(pady=(10, 60))
+
         self.janela.protocol("WM_DELETE_WINDOW", self.voltar)
 
         self.carregar_pacientes()
@@ -42,14 +67,14 @@ class TelaExcluirPaciente(tk.Frame):
         for i in self.tree.get_children():
             self.tree.delete(i)
 
-        # simulação (substitua por paciente_bd.listar())
-        pacientes = paciente_bd.listar() if hasattr(paciente_bd, "listar") else [
-            (1, "João", 25, "Motora", "99999-0000", "Maria"),
-            (2, "Ana", 32, "Visual", "88888-1111", "Carlos")
-        ]
-
-        for row in pacientes:
-            self.tree.insert("", tk.END, values=row)
+        pacientes = paciente_bd.listar()
+        for i, row in enumerate(pacientes):
+            cor = "cinza" if i % 2 == 0 else "branco"
+            # remove o ID da exibição, mas mantém na tupla para usar na exclusão
+            self.tree.insert("", tk.END, values=row[1:], tags=(cor,))
+        
+        self.tree.tag_configure("cinza", background="#f2f2f2")
+        self.tree.tag_configure("branco", background="#ffffff")
 
         print("[LOG] Pacientes carregados para exclusão")
 
@@ -60,12 +85,13 @@ class TelaExcluirPaciente(tk.Frame):
             return
 
         dados = self.tree.item(item)["values"]
-        if messagebox.askyesno("Confirmação", f"Deseja excluir {dados[1]}?"):
+        id_ = paciente_bd.listar()[self.tree.index(item)][0]  # pega ID real
+        if messagebox.askyesno("Confirmação", f"Deseja excluir {dados[0]}?"):
             try:
-                paciente_bd.excluir(dados[0])
+                paciente_bd.excluir(id_)
                 self.carregar_pacientes()
                 messagebox.showinfo("Sucesso", "Paciente excluído!")
-                print(f"[LOG] Paciente ID={dados[0]} excluído com sucesso")
+                print(f"[LOG] Paciente ID={id_} excluído com sucesso")
             except Exception as e:
                 messagebox.showerror("Erro", f"Falha ao excluir paciente: {e}")
 
