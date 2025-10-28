@@ -16,7 +16,10 @@ class TelaExcluirPaciente(tk.Frame):
 
         # ------------------- TÍTULO -------------------
         tk.Label(self.janela, text="Excluir Paciente",
-                 font=("Arial", 16, "bold"), bg="#f9f9f9").pack(pady=10)
+                 font=("Arial", 16, "bold"), bg="#f9f9f9").pack(pady=(10,0))
+
+        # Linha preta abaixo do título (como no editar)
+        tk.Frame(self.janela, height=2, bg="black").pack(fill="x", padx=40, pady=(0,10))
 
         # ------------------- ESTILO TREEVIEW -------------------
         style = ttk.Style()
@@ -31,27 +34,17 @@ class TelaExcluirPaciente(tk.Frame):
             relief="flat"
         )
 
-        # Linha preta abaixo do cabeçalho
-        style.layout("Treeview.Heading", [
-            ("Treeheading.cell", {'sticky': 'nswe'}),
-            ("Treeheading.border", {'sticky': 'nswe', 'children': [
-                ("Treeheading.padding", {'sticky': 'nswe', 'children': [
-                    ("Treeheading.image", {'side': 'right', 'sticky': ''}),
-                    ("Treeheading.text", {'sticky': 'we'})
-                ]})
-            ], 'border': '1'})  # aqui adiciona a borda inferior preta
-        ])
-
         # Corpo da tabela
         style.configure(
             "Treeview",
+            font=("Arial", 11),
+            rowheight=28,
             background="#ffffff",
             fieldbackground="#ffffff",
-            rowheight=28,
-            relief="flat"
+            relief="flat",
+            borderwidth=0
         )
         style.map("Treeview", background=[("selected", "#cce5ff")])
-        style.layout("Treeview", [("Treeview.treearea", {"sticky": "nswe"})])
 
         # ------------------- TREEVIEW -------------------
         self.tree = ttk.Treeview(
@@ -83,8 +76,9 @@ class TelaExcluirPaciente(tk.Frame):
         pacientes = paciente_bd.listar()
         for i, row in enumerate(pacientes):
             cor = "cinza" if i % 2 == 0 else "branco"
-            self.tree.insert("", tk.END, values=row[1:], tags=(cor,))
-        
+            self.tree.insert("", tk.END, iid=row[0], values=row[1:], tags=(cor,))
+
+        # Configura cores alternadas
         self.tree.tag_configure("cinza", background="#f2f2f2")
         self.tree.tag_configure("branco", background="#ffffff")
 
@@ -97,7 +91,7 @@ class TelaExcluirPaciente(tk.Frame):
             return
 
         dados = self.tree.item(item)["values"]
-        id_ = paciente_bd.listar()[self.tree.index(item)][0]  # pega ID real
+        id_ = self.tree.focus()  # pega o ID do paciente pelo iid
         if messagebox.askyesno("Confirmação", f"Deseja excluir {dados[0]}?"):
             try:
                 paciente_bd.excluir(id_)
