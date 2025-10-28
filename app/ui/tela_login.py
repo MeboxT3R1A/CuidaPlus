@@ -3,13 +3,14 @@ import tkinter as tk
 from tkinter import messagebox
 from app.ui.principal import TelaPrincipal
 from app.db import login_bd
+from app import auth
 
 class TelaLogin:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Cuida + Mais")
-        self.root.geometry("700x500")       # tamanho fixo
-        self.root.resizable(False, False)   # bloqueia redimensionamento
+        self.root.geometry("700x500")
+        self.root.resizable(False, False)
         self.root.configure(bg='#f0f0f0')
 
         self.fonte_grande = ('Arial', 12, 'bold')
@@ -30,7 +31,7 @@ class TelaLogin:
             titulo_frame,
             text="Cuida",
             font=('Arial', 32, 'bold'),
-            fg="#2ecc71",  # verde
+            fg="#2ecc71",
             bg=self.cor_fundo
         ).pack(side="left")
 
@@ -38,10 +39,9 @@ class TelaLogin:
             titulo_frame,
             text=" + Mais",
             font=('Arial', 32, 'bold'),
-            fg="#e74c3c",  # vermelho
+            fg="#e74c3c",
             bg=self.cor_fundo
         ).pack(side="left")
-
 
         login_frame = tk.Frame(self.frame, bg=self.cor_fundo)
         login_frame.pack(pady=50)
@@ -64,7 +64,7 @@ class TelaLogin:
         ).grid(row=2, column=0, columnspan=2, pady=20, ipadx=40)
 
     def validar_login(self):
-        email = self.entry_usuario.get().strip()
+        email = self.entry_usuario.get().strip().lower()  # normalize
         senha = self.entry_senha.get().strip()
 
         if not email or not senha:
@@ -74,10 +74,16 @@ class TelaLogin:
         usuario = login_bd.autenticar_usuario(email, senha)
 
         if usuario:
+            # usa a variável correta e registra em log
+            auth.set_current_user(usuario)
+            print(f"[LOGIN] Usuário logado: {usuario}")  # log no terminal
             messagebox.showinfo("Bem-vindo", f"Olá, {usuario['nome']}!")
             self.root.destroy()
             TelaPrincipal().executar()
         else:
+            print(f"[LOGIN] Falha de autenticação para: {email}")
+            # limpa campo de senha para evitar reuso
+            self.entry_senha.delete(0, tk.END)
             messagebox.showerror("Erro", "Usuário ou senha inválidos.")
 
     def executar(self):
