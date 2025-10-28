@@ -20,8 +20,9 @@ class TelaExcluirPaciente(tk.Frame):
 
         # ------------------- ESTILO TREEVIEW -------------------
         style = ttk.Style()
-        style.theme_use("clam")  # necessário para customizações
+        style.theme_use("clam")
 
+        # Cabeçalho
         style.configure(
             "Treeview.Heading",
             font=("Arial", 12, "bold"),
@@ -30,6 +31,18 @@ class TelaExcluirPaciente(tk.Frame):
             relief="flat"
         )
 
+        # Linha preta abaixo do cabeçalho
+        style.layout("Treeview.Heading", [
+            ("Treeheading.cell", {'sticky': 'nswe'}),
+            ("Treeheading.border", {'sticky': 'nswe', 'children': [
+                ("Treeheading.padding", {'sticky': 'nswe', 'children': [
+                    ("Treeheading.image", {'side': 'right', 'sticky': ''}),
+                    ("Treeheading.text", {'sticky': 'we'})
+                ]})
+            ], 'border': '1'})  # aqui adiciona a borda inferior preta
+        ])
+
+        # Corpo da tabela
         style.configure(
             "Treeview",
             background="#ffffff",
@@ -70,7 +83,6 @@ class TelaExcluirPaciente(tk.Frame):
         pacientes = paciente_bd.listar()
         for i, row in enumerate(pacientes):
             cor = "cinza" if i % 2 == 0 else "branco"
-            # remove o ID da exibição, mas mantém na tupla para usar na exclusão
             self.tree.insert("", tk.END, values=row[1:], tags=(cor,))
         
         self.tree.tag_configure("cinza", background="#f2f2f2")
