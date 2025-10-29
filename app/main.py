@@ -8,7 +8,6 @@ if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
 from app.ui.tela_login import TelaLogin  # importações normais
-
 def main():
     print("Iniciando aplicativo da Clínica Especializada...")
     from app.db.setup import criar_banco
