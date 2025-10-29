@@ -68,24 +68,14 @@ def listar():
         conn.close()
 
 def salvar(dados):
-    """
-    Cria um novo paciente. Espera um dicionário no formato:
-    {
-        'nome': str,
-        'data_nasc': 'YYYY-MM-DD',
-        'tipo_deficiencia': str,
-        'contato': str,  # email
-        'responsavel': str
-    }
-    """
+
     conn = conectar()
     cursor = conn.cursor()
     try:
-        # Inserção em Usuario
         cursor.execute("""
             INSERT INTO Usuario (nome, email, senhaHash, papel)
             VALUES (?, ?, ?, 'PACIENTE')
-        """, (dados['nome'], dados['contato'], "hash_fake"))
+        """, (dados['nome'], dados['contato'], None))
         novo_id = cursor.lastrowid
 
         # Inserção em Paciente

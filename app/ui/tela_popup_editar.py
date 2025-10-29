@@ -69,15 +69,40 @@ class EditarPopup(tk.Toplevel):
         if not nome:
             messagebox.showerror("Erro", "O campo 'Nome' é obrigatório.")
             return
+
+        # --- Data ---
         if not data_nasc_br:
             messagebox.showerror("Erro", "O campo 'Data de Nascimento' é obrigatório.")
             return
+
+        # valida formato e existência real da data
+        try:
+            data_nasc = datetime.strptime(data_nasc_br, "%d/%m/%Y").date()
+        except ValueError:
+            messagebox.showerror("Erro", "Data inválida. Use o formato DD/MM/AAAA e uma data real (ex: 29/02 só em ano bissexto).")
+            return
+
+        # verifica se não é futura
+        hoje = datetime.now().date()
+        if data_nasc > hoje:
+            messagebox.showerror("Erro", "A data de nascimento não pode estar no futuro.")
+            return
+
+        # --- Tipo ---
         if not tipo:
             messagebox.showerror("Erro", "O campo 'Tipo de Deficiência' é obrigatório.")
             return
+
+        # --- Email ---
         if not email:
             messagebox.showerror("Erro", "O campo 'E-mail' é obrigatório.")
             return
+        import re
+        padrao_email = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(padrao_email, email):
+            messagebox.showerror("Erro", "Formato de e-mail inválido. Exemplo válido: nome@dominio.com")
+            return
+
 
         # === Conversão e validação da data ===
         data_iso = self._parse_data_br_to_iso(data_nasc_br)
