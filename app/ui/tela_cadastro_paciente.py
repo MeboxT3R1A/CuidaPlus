@@ -8,8 +8,9 @@ from app.db import paciente_bd
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 class TelaCadastroPaciente:
-    def __init__(self, master):
+    def __init__(self, master, on_success=None):
         self.master = master
+        self.on_success = on_success      
         self.master.withdraw()
         
         self.janela = tk.Toplevel(master)
@@ -173,17 +174,9 @@ class TelaCadastroPaciente:
             saved = paciente_bd.salvar(dados)
             if saved:
                 messagebox.showinfo("Sucesso", f"Paciente '{nome}' cadastrado com sucesso!")
-                print(f"[LOG] Paciente '{nome}' cadastrado com sucesso!")
-
-                # limpa campos
-                for chave, entrada in self.entradas.items():
-                    if isinstance(entrada, dict):  # data_nasc
-                        for parte, e in entrada.items():
-                            e.delete(0, tk.END)
-                            e.insert(0, {"dia": "DD", "mes": "MM", "ano": "AAAA"}[parte])
-                            e.config(fg="gray")
-                    else:
-                        entrada.delete(0, tk.END)
+                if self.on_success:
+                    self.on_success()
+                self.voltar()
             else:
                 messagebox.showerror("Erro", "Falha ao salvar paciente no banco de dados.")
                 print("[ERRO] Falha ao cadastrar paciente.")

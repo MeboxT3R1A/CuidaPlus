@@ -6,8 +6,9 @@ from app.db import paciente_bd
 from datetime import datetime
 
 class TelaEditarPaciente(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, on_success=None):
         self.master = master
+        self.on_success = on_success      
         self.master.withdraw()
         
         self.janela = tk.Toplevel(master)
@@ -141,5 +142,13 @@ class TelaEditarPaciente(tk.Frame):
         EditarPopup(self.janela, dados_para_popup, self.carregar_pacientes)
 
     def voltar(self):
+        try:
+            # se a tela principal tiver o método carregar_pacientes, atualiza antes de voltar
+            if hasattr(self.master, "carregar_pacientes"):
+                self.master.carregar_pacientes()
+        except Exception as e:
+            print(f"[ERRO ao atualizar lista ao voltar]: {e}")
+        
         self.janela.destroy()
         self.master.deiconify()
+

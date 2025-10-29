@@ -179,18 +179,22 @@ class TelaPacientes:
 
     def abrir_cadastrar(self):
         from app.ui.tela_cadastro_paciente import TelaCadastroPaciente
-        self.root.withdraw()  # apenas esconde
-        TelaCadastroPaciente(self.root)  # passa a mesma janela principal
+        self.root.withdraw()
+        TelaCadastroPaciente(self.root, on_success=self._atualizar_lista)
 
     def abrir_editar(self):
         from app.ui.tela_editar_paciente import TelaEditarPaciente
         self.root.withdraw()
-        TelaEditarPaciente(self.root)  # mesma janela, sem destruir
+        TelaEditarPaciente(self.root, on_success=self._atualizar_lista)
 
     def abrir_excluir(self):
         from app.ui.tela_excluir_paciente import TelaExcluirPaciente
         self.root.withdraw()
-        TelaExcluirPaciente(self.root)
+        TelaExcluirPaciente(self.root, on_success=self._atualizar_lista)
+
+    def _atualizar_lista(self):
+        self.carregar_pacientes()
+        self.root.deiconify()
 
     # ---------- VOLTAR ----------
     def voltar(self):
