@@ -51,11 +51,10 @@ class TelaExcluirPaciente(tk.Frame):
         for i in self.tree.get_children():
             self.tree.delete(i)
 
-        pacientes = paciente_bd.listar()
-        for i, row in enumerate(pacientes):
-            cor = "cinza" if i % 2 == 0 else "branco"
-            # iid = id do paciente (row[0]); values = demais colunas
-            self.tree.insert("", tk.END, iid=row[0], values=row[1:], tags=(cor,))
+        pacientes = paciente_bd.listar_pacientes()
+
+        for row in pacientes:
+            self.tree.insert("", tk.END, values=row)
 
         self.tree.tag_configure("cinza", background="#f2f2f2")
         self.tree.tag_configure("branco", background="#ffffff")

@@ -23,24 +23,10 @@ def consultas_hoje():
     conn.close()
     return total
 
-def listar_pacientes():
-    conn = conectar()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT u.nome, p.dataNascimento 
-        FROM Usuario u
-        JOIN Paciente p ON u.id = p.id
-    """)
-    pacientes = cursor.fetchall()  
-    conn.close()
-    return pacientes
-
 #-------------------------------------
 
-def listar():
-    """Retorna todos os pacientes com informações básicas:
-       (id, nome, dataNascimento, idade, tipoDeficiencia, email, responsavel)
-    """
+def listar_pacientes():
+    """Retorna todos os pacientes com informações básicas."""
     conn = conectar()
     cursor = conn.cursor()
     try:

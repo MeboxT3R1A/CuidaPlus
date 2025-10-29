@@ -104,7 +104,7 @@ class TelaEditarPaciente(tk.Frame):
         for i in self.tree.get_children():
             self.tree.delete(i)
 
-        pacientes = paciente_bd.listar()
+        pacientes = paciente_bd.listar_pacientes()
         for i, row in enumerate(pacientes):
             # row: (id, nome, dataNascimento, idade, tipoDeficiencia, email, responsavel)
             id_ = row[0]
