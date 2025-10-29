@@ -59,35 +59,59 @@ class EditarPopup(tk.Toplevel):
             return None
 
     def _on_salvar(self):
-        # monta dicionário com as mesmas chaves que paciente_bd.atualizar/salvar esperam
         nome = self.entradas["nome"].get().strip()
         data_nasc_br = self.entradas["data_nasc"].get().strip()
         tipo = self.entradas["tipo_de_deficiencia"].get().strip()
         email = self.entradas["contato"].get().strip()
-        responsavel = self.entradas["responsavel"].get().strip() or "Responsavel não identificado"
+        responsavel = self.entradas["responsavel"].get().strip() or "Responsável não identificado"
 
-        # validações mínimas
+        # === Validação ===
         if not nome:
-            messagebox.showerror("Erro", "Nome é obrigatório.")
+            messagebox.showerror("Erro", "O campo 'Nome' é obrigatório.")
+            return
+        if not data_nasc_br:
+            messagebox.showerror("Erro", "O campo 'Data de Nascimento' é obrigatório.")
+            return
+        if not tipo:
+            messagebox.showerror("Erro", "O campo 'Tipo de Deficiência' é obrigatório.")
+            return
+        if not email:
+            messagebox.showerror("Erro", "O campo 'E-mail' é obrigatório.")
             return
 
+        # === Conversão e validação da data ===
         data_iso = self._parse_data_br_to_iso(data_nasc_br)
-        if data_nasc_br and not data_iso:
-            messagebox.showerror("Erro", "Data de nascimento inválida. Use DD/MM/AAAA.")
+        if not data_iso:
+            messagebox.showerror("Erro", "Data inválida. Use o formato DD/MM/AAAA.")
+            return
+
+        # === Recalcula idade ===
+        try:
+            data_nasc = datetime.strptime(data_iso, "%Y-%m-%d").date()
+            hoje = datetime.now().date()
+            idade = hoje.year - data_nasc.year - ((hoje.month, hoje.day) < (data_nasc.month, data_nasc.day))
+        except Exception:
+            messagebox.showerror("Erro", "Não foi possível calcular a idade a partir da data informada.")
             return
 
         dados = {
             "nome": nome,
-            "data_nasc": data_iso,  # se None ficará como NULL no DB (se desejar tratar diferente, adapte)
+            "data_nasc": data_iso,
+            "idade": idade,
             "tipo_de_deficiencia": tipo,
             "contato": email,
             "responsavel": responsavel
         }
 
-        # chama atualizar; paciente_bd.atualizar atualiza nome, email, tipoDeficiencia, responsavel
-        if paciente_bd.atualizar(int(self.id_paciente), dados):
-            print(f"[LOG] Paciente ID={self.id_paciente} atualizado: {dados}")
-            self.callback()
-            self.destroy()
-        else:
-            messagebox.showerror("Erro", "Falha ao atualizar paciente.")
+        try:
+            atualizado = paciente_bd.atualizar(int(self.id_paciente), dados)
+            if atualizado:
+                messagebox.showinfo("Sucesso", f"Paciente '{nome}' atualizado com sucesso!")
+                print(f"[LOG] Paciente ID={self.id_paciente} atualizado: {dados}")
+                self.callback()  # recarrega a lista
+                self.destroy()
+            else:
+                messagebox.showerror("Erro", "Falha ao atualizar o paciente no banco de dados.")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro inesperado ao salvar: {e}")
+            print(f"[ERRO] Erro ao atualizar paciente: {e}")

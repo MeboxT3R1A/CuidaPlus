@@ -132,45 +132,49 @@ class TelaCadastroPaciente:
     def salvar_paciente(self):
         nome = self.entradas["nome"].get().strip()
         data_raw = self._obter_data_nascimento()
-        if not data_raw:
-            print("[ERRO] Preencha a data de nascimento completa!")
-            return
-
         tipo_def = self.entradas["tipo_deficiencia"].get().strip()
         email_raw = self.entradas["email"].get().strip()
-        responsavel = self.entradas["responsavel"].get().strip()
+        responsavel = self.entradas["responsavel"].get().strip() or "Responsavel não identificado"
 
-        # validações básicas
-        if not nome:
-            print("[ERRO] O campo Nome é obrigatório!")
+        # === Validação de campos obrigatórios ===
+        if not nome or not data_raw or not tipo_def or not email_raw:
+            messagebox.showerror("Erro", "Preencha todos os campos obrigatórios (exceto Responsável).")
+            print("[ERRO] Campos obrigatórios vazios.")
             return
 
+        # === Validação de data ===
         ok_date, date_info = self._validar_data(data_raw)
         if not ok_date:
+            messagebox.showerror("Erro na Data", date_info)
             print(f"[ERRO] {date_info}")
             return
         data_iso = date_info.isoformat()
 
+        # === Validação de e-mail ===
         ok_email, email_valido = self._validar_email(email_raw)
         if not ok_email:
+            messagebox.showerror("Erro no E-mail", email_valido)
             print(f"[ERRO] {email_valido}")
             return
-        
+
         if not responsavel:
-            responsavel = "Responsavel não identificado"
+            responsavel = "Responsável não identificado"
 
         dados = {
             "nome": nome,
             "data_nasc": data_iso,
             "tipo_deficiencia": tipo_def,
             "contato": email_valido,
-            "responsavel": responsavel,  # para popular Usuario.email
+            "responsavel": responsavel,
         }
 
+        # === Inserção no banco ===
         try:
             saved = paciente_bd.salvar(dados)
             if saved:
+                messagebox.showinfo("Sucesso", f"Paciente '{nome}' cadastrado com sucesso!")
                 print(f"[LOG] Paciente '{nome}' cadastrado com sucesso!")
+
                 # limpa campos
                 for chave, entrada in self.entradas.items():
                     if isinstance(entrada, dict):  # data_nasc
@@ -181,9 +185,12 @@ class TelaCadastroPaciente:
                     else:
                         entrada.delete(0, tk.END)
             else:
-                print("[ERRO] Falha ao cadastrar paciente!")
+                messagebox.showerror("Erro", "Falha ao salvar paciente no banco de dados.")
+                print("[ERRO] Falha ao cadastrar paciente.")
         except Exception as e:
+            messagebox.showerror("Erro", f"Erro inesperado ao salvar: {e}")
             print(f"[ERRO] Erro ao salvar no banco: {e}")
+
 
     # ---------------- voltar ----------------
     def voltar(self):
