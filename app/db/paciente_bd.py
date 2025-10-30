@@ -113,7 +113,7 @@ def atualizar(id_, dados):
             WHERE id = ?
         """, (
             dados.get("data_nasc"),
-            dados.get("tipo_deficiencia"),
+            dados.get("tipo_de_deficiencia"),
             dados.get("responsavel"),
             id_
         ))
