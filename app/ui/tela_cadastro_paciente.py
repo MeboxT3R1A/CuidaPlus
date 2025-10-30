@@ -187,6 +187,17 @@ class TelaCadastroPaciente:
 
     # ---------------- voltar ----------------
     def voltar(self):
+        # Tenta primeiro avisar o callback (se houver) — faz isso antes de destruir a janela.
+        try:
+            if callable(self.on_success):
+                try:
+                    self.on_success()
+                except Exception as e:
+                    print(f"[ERRO] on_success() levantou exceção: {e}")
+        except Exception as e:
+            print(f"[ERRO] ao verificar on_success: {e}")
+
+        # Fecha a janela do cadastro e revela a janela principal (root) de forma segura.
         try:
             self.janela.destroy()
         except Exception:
@@ -195,3 +206,4 @@ class TelaCadastroPaciente:
             self.master.deiconify()
         except Exception:
             pass
+

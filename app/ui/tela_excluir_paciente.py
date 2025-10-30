@@ -95,32 +95,31 @@ class TelaExcluirPaciente(tk.Frame):
             return iso_date
 
     def carregar_pacientes(self):
-        # limpa
         for i in self.tree.get_children():
             self.tree.delete(i)
 
-        pacientes = paciente_bd.listar()
+        pacientes = paciente_bd.listar_pacientes()
         for i, row in enumerate(pacientes):
-            # row esperado: (id, nome, dataNascimento, idade, tipoDeficiencia, email(contato), responsavel)
+            # row: (id, nome, dataNascimento, idade, tipoDeficiencia, email, responsavel)
             id_ = row[0]
             nome = row[1]
-            nascimento_iso = row[2] if len(row) > 2 else ""
-            idade = row[3] if len(row) > 3 else ""
-            tipo = row[4] if len(row) > 4 else ""
-            contato = row[5] if len(row) > 5 else ""
-            responsavel = row[6] if len(row) > 6 else ""
+            nascimento_iso = row[2]
+            idade = row[3]
+            tipo = row[4]
+            contato = row[5]
+            responsavel = row[6]
 
             nascimento_br = self._formatar_data_br(nascimento_iso)
 
             values = (nome, nascimento_br, idade, tipo, contato, responsavel)
             cor = "cinza" if i % 2 == 0 else "branco"
             self.tree.insert("", tk.END, iid=str(id_), values=values, tags=(cor,))
-        pacientes = paciente_bd.listar_pacientes()
 
         # Configura cores alternadas
         self.tree.tag_configure("cinza", background="#f2f2f2")
         self.tree.tag_configure("branco", background="#ffffff")
-        print("[LOG] Pacientes carregados para exclusão")
+
+        print("[LOG] Lista de pacientes carregada")
 
     def _confirmar_exclusao_com_senha(self):
         item = self.tree.focus()
@@ -179,12 +178,20 @@ class TelaExcluirPaciente(tk.Frame):
         self._confirmar_exclusao_com_senha()
 
     def voltar(self):
+        # Primeiro: preferir chamar o callback on_success se fornecido
         try:
-            # se a tela principal tiver o método carregar_pacientes, atualiza antes de voltar
-            if hasattr(self.master, "carregar_pacientes"):
-                self.master.carregar_pacientes()
+            if callable(self.on_success):
+                self.on_success()
+            else:
+                # fallback antigo: tenta atualizar a master caso esta possua o método
+                if hasattr(self.master, "carregar_pacientes"):
+                    self.master.carregar_pacientes()
         except Exception as e:
             print(f"[ERRO ao atualizar lista ao voltar]: {e}")
         
         self.janela.destroy()
-        self.master.deiconify()
+        try:
+            self.master.deiconify()
+        except Exception:
+            pass
+

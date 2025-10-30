@@ -142,13 +142,21 @@ class TelaEditarPaciente(tk.Frame):
         EditarPopup(self.janela, dados_para_popup, self.carregar_pacientes)
 
     def voltar(self):
+        # Primeiro: preferir chamar o callback on_success se fornecido
         try:
-            # se a tela principal tiver o método carregar_pacientes, atualiza antes de voltar
-            if hasattr(self.master, "carregar_pacientes"):
-                self.master.carregar_pacientes()
+            if callable(self.on_success):
+                self.on_success()
+            else:
+                # fallback antigo: tenta atualizar a master caso esta possua o método
+                if hasattr(self.master, "carregar_pacientes"):
+                    self.master.carregar_pacientes()
         except Exception as e:
             print(f"[ERRO ao atualizar lista ao voltar]: {e}")
         
         self.janela.destroy()
-        self.master.deiconify()
+        try:
+            self.master.deiconify()
+        except Exception:
+            pass
+
 

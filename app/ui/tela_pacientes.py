@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, date
 from app.db import paciente_bd
+from app.ui.tela_ver_mais import TelaVerMais
 
 class TelaPacientes:
     def __init__(self):
@@ -146,8 +147,8 @@ class TelaPacientes:
         for w in self.frame_pacientes.winfo_children():
             w.destroy()
 
-        pacientes = paciente_bd.listar_pacientes()
-        for i, (nome, data_nasc) in enumerate(pacientes):
+        pacientes = paciente_bd.listar()
+        for i, (id_paciente, nome, data_nasc) in enumerate(pacientes):
             card = tk.Frame(
                 self.frame_pacientes,
                 bg="white",
@@ -174,9 +175,19 @@ class TelaPacientes:
             tk.Label(card, text=f"Idade: {idade_text}",
                     font=('Arial', 10), bg="white").pack(pady=(0, 10))
 
-            tk.Button(card, text="Ver Mais",
-                    bg="#3498db", fg="white", font=('Arial', 10, 'bold')).pack(ipadx=10, ipady=3)
+            tk.Button(
+                card,
+                text="Ver Mais",
+                bg="#3498db",
+                fg="white",
+                font=('Arial', 10, 'bold'),
+                command=lambda pid=id_paciente: self.abrir_ver_mais(pid)
+            ).pack(ipadx=10, ipady=3)
 
+    def abrir_ver_mais(self, id_paciente):
+        TelaVerMais(id_paciente).executar()
+
+    
     def abrir_cadastrar(self):
         from app.ui.tela_cadastro_paciente import TelaCadastroPaciente
         self.root.withdraw()
