@@ -10,7 +10,7 @@ def criar_banco():
     CREATE TABLE IF NOT EXISTS Usuario (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
+        email TEXT NOT NULL,
         senhaHash TEXT NOT NULL,
         papel TEXT CHECK(papel IN ('ADMIN', 'PACIENTE', 'COORDENACAO')) NOT NULL
     );
@@ -69,7 +69,7 @@ def criar_banco():
         -- Usuários base
         INSERT OR IGNORE INTO Usuario (id, nome, email, senhaHash, papel) VALUES 
         (1, 'Administrador', 'a', 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb', 'ADMIN'),
-        (2, 'João Paciente', 'joao@paciente.com', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'PACIENTE'),
+        (2, 'João Paciente', 'joao@paciente.com', 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb', 'PACIENTE'),
         (3, 'Maria Coordenação', 'maria@coord.com', '8c63a2fc2b14d8ae6f9d0bf2e2c4227ac2dc4bd84768e1259226b0c3d84f1c65', 'COORDENACAO');
 
         -- Gera 50 pacientes (IDs 10–59)

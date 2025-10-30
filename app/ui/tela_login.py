@@ -1,7 +1,7 @@
-# app/ui/login.py
+# app/ui/tela_login.py
 import tkinter as tk
 from tkinter import messagebox
-from app.ui.principal import TelaPrincipal
+from app.ui.tela_principal import TelaPrincipal
 from app.db import login_bd
 from app import auth
 
@@ -73,18 +73,27 @@ class TelaLogin:
 
         usuario = login_bd.autenticar_usuario(email, senha)
 
-        if usuario:
-            # usa a variável correta e registra em log
-            auth.set_current_user(usuario)
-            print(f"[LOGIN] Usuário logado: {usuario}")  # log no terminal
-            messagebox.showinfo("Bem-vindo", f"Olá, {usuario['nome']}!")
-            self.root.destroy()
-            TelaPrincipal().executar()
-        else:
+        if not usuario:
             print(f"[LOGIN] Falha de autenticação para: {email}")
-            # limpa campo de senha para evitar reuso
             self.entry_senha.delete(0, tk.END)
             messagebox.showerror("Erro", "Usuário ou senha inválidos.")
+            return
+
+        # Bloqueia pacientes
+        papel = usuario.get("papel", "").upper()
+        if papel == "PACIENTE":
+            messagebox.showerror("Acesso negado", "Pacientes não têm permissão para acessar o sistema.")
+            print(f"[LOGIN BLOQUEADO] Tentativa de login com paciente: {usuario['nome']}")
+            self.entry_senha.delete(0, tk.END)
+            return
+
+        # Se passou, faz login normalmente
+        auth.set_current_user(usuario)
+        print(f"[LOGIN] Usuário logado: {usuario}")  # log no terminal
+        messagebox.showinfo("Bem-vindo", f"Olá, {usuario['nome']}!")
+        self.root.destroy()
+        TelaPrincipal().executar()
+
 
     def executar(self):
         self.root.mainloop()

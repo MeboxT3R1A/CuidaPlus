@@ -57,7 +57,7 @@ class TelaSobre:
 
 
     def voltar(self):
-        from app.ui.principal import TelaPrincipal
+        from app.ui.tela_principal import TelaPrincipal
         self.root.destroy()
         TelaPrincipal().executar()
 

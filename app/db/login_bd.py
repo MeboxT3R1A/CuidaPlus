@@ -19,4 +19,3 @@ def autenticar_usuario(email, senha):
         return {"id": user[0], "nome": user[1], "papel": user[2]}
     print("[LOGIN] Falha de autenticação para:", email)
     return None
-

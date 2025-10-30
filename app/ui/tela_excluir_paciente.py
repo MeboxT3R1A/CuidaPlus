@@ -3,10 +3,12 @@ import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from app.db import paciente_bd
 from app import auth
+from datetime import datetime
 
 class TelaExcluirPaciente(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, on_success=None):
         self.master = master
+        self.on_success = on_success
         self.master.withdraw()
         
         self.janela = tk.Toplevel(master)
@@ -20,42 +22,102 @@ class TelaExcluirPaciente(tk.Frame):
                  font=("Arial", 16, "bold"), bg="#f9f9f9").pack(pady=(10,0))
         tk.Frame(self.janela, height=2, bg="black").pack(fill="x", padx=40, pady=(0,10))
 
-        # Style do Treeview (leve)
+        # ------------------- ESTILO TREEVIEW (mesmo do editar) -------------------
         style = ttk.Style()
-        try:
-            style.theme_use("clam")
-        except Exception:
-            pass
+        style.theme_use("clam")  # usar mesmo tema do editar para consistência
 
-        style.configure("Treeview.Heading", font=("Arial", 12, "bold"), background="#f2f2f2", foreground="black", relief="flat")
-        style.configure("Treeview", font=("Arial", 11), rowheight=28, background="#ffffff", fieldbackground="#ffffff", relief="flat", borderwidth=0)
+        style.configure(
+            "Treeview.Heading",
+            font=("Arial", 12, "bold"),
+            background="#f2f2f2",
+            foreground="black",
+            relief="flat"
+        )
+        style.configure(
+            "Treeview",
+            font=("Arial", 11),
+            rowheight=28,
+            background="#ffffff",
+            fieldbackground="#ffffff",
+            relief="flat",
+            borderwidth=0
+        )
         style.map("Treeview", background=[("selected", "#cce5ff")])
 
-        # Treeview (sem coluna id visível)
-        self.tree = ttk.Treeview(self.janela, columns=("nome", "idade", "tipo", "contato", "responsavel"), show="headings")
+        # ------------------- TREEVIEW -------------------
+        # agora com coluna 'nascimento' explícita para manter paridade com editar
+        self.tree = ttk.Treeview(
+            self.janela,
+            columns=("nome", "nascimento", "idade", "tipo", "contato", "responsavel"),
+            show="headings"
+        )
+        headings = {
+            "nome": "Nome",
+            "nascimento": "Nascimento",
+            "idade": "Idade",
+            "tipo": "Tipo",
+            "contato": "Contato",
+            "responsavel": "Responsável"
+        }
         for col in self.tree["columns"]:
-            self.tree.heading(col, text=col.title())
-            self.tree.column(col, anchor="center")
+            self.tree.heading(col, text=headings[col])
+            if col == "nome":
+                self.tree.column(col, anchor="w", width=220)
+            elif col == "nascimento":
+                self.tree.column(col, anchor="center", width=120)
+            elif col == "idade":
+                self.tree.column(col, anchor="center", width=80)
+            else:
+                self.tree.column(col, anchor="center", width=140)
+
         self.tree.pack(padx=40, pady=10, fill="both", expand=True)
 
-        # botões
-        tk.Button(self.janela, text="Atualizar Lista", command=self.carregar_pacientes).pack()
-        tk.Button(self.janela, text="Excluir Selecionado", command=self._confirmar_exclusao_com_senha, bg="#E74C3C", fg="white").pack(pady=5)
-        tk.Button(self.janela, text="Voltar", command=self.voltar, width=15).pack(pady=(10, 60))
+        # ------------------- BOTÕES (alinhados horizontalmente, igual editar) -------------------
+        btn_frame = tk.Frame(self.janela, bg="#f9f9f9")
+        btn_frame.pack(pady=(0, 40))
+        tk.Button(btn_frame, text="Atualizar Lista",
+                  command=self.carregar_pacientes).grid(row=0, column=0, padx=8)
+        tk.Button(btn_frame, text="Excluir Selecionado",
+                  command=self._confirmar_exclusao_com_senha, bg="#E74C3C", fg="white").grid(row=0, column=1, padx=8)
+        tk.Button(btn_frame, text="Voltar", command=self.voltar, width=15).grid(row=0, column=2, padx=8)
 
         self.janela.protocol("WM_DELETE_WINDOW", self.voltar)
         self.carregar_pacientes()
+
+    def _formatar_data_br(self, iso_date):
+        """Recebe 'YYYY-MM-DD' -> retorna 'DD/MM/YYYY' ou '' se inválido."""
+        if not iso_date:
+            return ""
+        try:
+            dt = datetime.strptime(iso_date, "%Y-%m-%d").date()
+            return dt.strftime("%d/%m/%Y")
+        except Exception:
+            return iso_date
 
     def carregar_pacientes(self):
         # limpa
         for i in self.tree.get_children():
             self.tree.delete(i)
 
+        pacientes = paciente_bd.listar()
+        for i, row in enumerate(pacientes):
+            # row esperado: (id, nome, dataNascimento, idade, tipoDeficiencia, email(contato), responsavel)
+            id_ = row[0]
+            nome = row[1]
+            nascimento_iso = row[2] if len(row) > 2 else ""
+            idade = row[3] if len(row) > 3 else ""
+            tipo = row[4] if len(row) > 4 else ""
+            contato = row[5] if len(row) > 5 else ""
+            responsavel = row[6] if len(row) > 6 else ""
+
+            nascimento_br = self._formatar_data_br(nascimento_iso)
+
+            values = (nome, nascimento_br, idade, tipo, contato, responsavel)
+            cor = "cinza" if i % 2 == 0 else "branco"
+            self.tree.insert("", tk.END, iid=str(id_), values=values, tags=(cor,))
         pacientes = paciente_bd.listar_pacientes()
 
-        for row in pacientes:
-            self.tree.insert("", tk.END, values=row)
-
+        # Configura cores alternadas
         self.tree.tag_configure("cinza", background="#f2f2f2")
         self.tree.tag_configure("branco", background="#ffffff")
         print("[LOG] Pacientes carregados para exclusão")
@@ -96,7 +158,6 @@ class TelaExcluirPaciente(tk.Frame):
         if not messagebox.askyesno("Confirmação", f"Deseja realmente excluir {nome}? (autenticado)"):
             return
 
-        # executa exclusão (iid é string, converte para int)
         try:
             id_paciente = int(self.tree.focus())
         except Exception:
@@ -119,10 +180,11 @@ class TelaExcluirPaciente(tk.Frame):
 
     def voltar(self):
         try:
-            self.janela.destroy()
-        except Exception:
-            pass
-        try:
-            self.master.deiconify()
-        except Exception:
-            pass
+            # se a tela principal tiver o método carregar_pacientes, atualiza antes de voltar
+            if hasattr(self.master, "carregar_pacientes"):
+                self.master.carregar_pacientes()
+        except Exception as e:
+            print(f"[ERRO ao atualizar lista ao voltar]: {e}")
+        
+        self.janela.destroy()
+        self.master.deiconify()

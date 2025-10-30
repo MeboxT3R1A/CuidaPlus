@@ -23,6 +23,21 @@ def consultas_hoje():
     conn.close()
     return total
 
+def listar_pacientes():
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT u.nome, p.dataNascimento
+        FROM Usuario u
+        JOIN Paciente p ON u.id = p.id
+        WHERE u.papel = 'PACIENTE'
+        ORDER BY u.id
+    """)
+    pacientes = cursor.fetchall()
+    conn.close()
+    return pacientes
+
+
 #-------------------------------------
 
 def listar_pacientes():
@@ -51,24 +66,14 @@ def listar_pacientes():
         conn.close()
 
 def salvar(dados):
-    """
-    Cria um novo paciente. Espera um dicionário no formato:
-    {
-        'nome': str,
-        'data_nasc': 'YYYY-MM-DD',
-        'tipo_deficiencia': str,
-        'contato': str,  # email
-        'responsavel': str
-    }
-    """
+
     conn = conectar()
     cursor = conn.cursor()
     try:
-        # Inserção em Usuario
         cursor.execute("""
             INSERT INTO Usuario (nome, email, senhaHash, papel)
             VALUES (?, ?, ?, 'PACIENTE')
-        """, (dados['nome'], dados['contato'], "hash_fake"))
+        """, (dados['nome'], dados['contato'], None))
         novo_id = cursor.lastrowid
 
         # Inserção em Paciente
@@ -89,20 +94,35 @@ def salvar(dados):
         conn.close()
 
 def atualizar(id_, dados):
-    """Atualiza dados de um paciente existente."""
+    """Atualiza dados de um paciente existente (Usuario + Paciente)."""
     conn = conectar()
     cursor = conn.cursor()
     try:
-        # atualiza nome e email em Usuario
-        cursor.execute("UPDATE Usuario SET nome=?, email=? WHERE id=?", (dados.get("nome"), dados.get("contato"), id_))
-        # atualiza tipoDeficiencia e responsavel em Paciente
-        cursor.execute("UPDATE Paciente SET tipoDeficiencia=?, responsavel=? WHERE id=?", 
-                       (dados.get("tipo_de_deficiencia"), dados.get("responsavel"), id_))
+        # Atualiza dados na tabela Usuario
+        cursor.execute("""
+            UPDATE Usuario
+            SET nome = ?, email = ?
+            WHERE id = ?
+        """, (dados.get("nome"), dados.get("contato"), id_))
+
+        # Atualiza dados na tabela Paciente
+        cursor.execute("""
+            UPDATE Paciente
+            SET dataNascimento = ?, tipoDeficiencia = ?, responsavel = ?
+            WHERE id = ?
+        """, (
+            dados.get("data_nasc"),
+            dados.get("tipo_de_deficiencia"),
+            dados.get("responsavel"),
+            id_
+        ))
+
         conn.commit()
-        print(f"[LOG][paciente_bd.atualizar] Paciente ID={id_} atualizado.")
+        print(f"[LOG][paciente_bd.atualizar] Paciente ID={id_} atualizado com sucesso.")
         return True
+
     except Exception as e:
-        print("[ERRO][paciente_bd.atualizar]:", e)
+        print(f"[ERRO][paciente_bd.atualizar]: {e}")
         conn.rollback()
         return False
     finally:
